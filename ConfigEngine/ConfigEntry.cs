@@ -1,0 +1,1 @@
+public readonly record struct ConfigEntry(string Key, string Value);
