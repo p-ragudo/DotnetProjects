@@ -1,0 +1,79 @@
+# AsyncAPI Contract (Real-time WebSockets / SignalR)
+asyncapi: 3.0.0
+info:
+  title: TicTacToe Realtime Game Hub API
+  version: 1.0.0
+
+channels:
+  gameHub:
+    address: /hubs/game
+    messages:
+      # --- CLIENT TO SERVER EVENTS (Inbound) ---
+      JoinGame:
+        summary: Join or reconnect to a game room
+        payload:
+          type: object
+          properties:
+            gameId:
+              type: string
+              format: uuid
+
+      MakeMove:
+        summary: Attempt a move on the board
+        payload:
+          type: object
+          properties:
+            gameId:
+              type: string
+              format: uuid
+            index:
+              type: integer
+              minimum: 0
+              maximum: 8
+
+      # --- SERVER TO CLIENT EVENTS (Outbound Broadcasts) ---
+      GameUpdated:
+        summary: Pushed to room members when state changes
+        payload:
+          $ref: '#/components/schemas/GameStatePayload'
+
+      MoveFailed:
+        summary: Pushed ONLY to the caller when a move is invalid
+        payload:
+          type: object
+          properties:
+            reason:
+              type: string
+              example: "It is not your turn"
+
+      PlayerStatusChanged:
+        summary: Pushed when an opponent connects, disconnects, or forfeits
+        payload:
+          type: object
+          properties:
+            event:
+              type: string
+              enum: [OpponentJoined, OpponentDisconnected, OpponentReconnected]
+
+components:
+  schemas:
+    GameStatePayload:
+      type: object
+      properties:
+        gameId:
+          type: string
+          format: uuid
+        boardState:
+          type: array
+          items:
+            type: string
+          example: ["X", "", "", "", "O", "", "", "", ""]
+        currentTurn:
+          type: string
+          enum: [X, O]
+        status:
+          type: string
+          enum: [WaitingForOpponent, InProgress, Won, Draw]
+        winner:
+          type: string
+          nullable: true
