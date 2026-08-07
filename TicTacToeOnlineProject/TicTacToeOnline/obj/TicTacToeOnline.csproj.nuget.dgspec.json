@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj": {}
+    "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj": {}
   },
   "projects": {
-    "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj": {
+    "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
+        "projectUniqueName": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
         "projectName": "TicTacToeOnline",
-        "projectPath": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
+        "projectPath": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
         "packagesPath": "C:\\Users\\Paolo Ragudo\\.nuget\\packages\\",
-        "outputPath": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\obj\\",
+        "outputPath": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Paolo Ragudo\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -47,6 +47,10 @@
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[10.0.7, )"
+            },
+            "Microsoft.AspNetCore.SignalR.Client": {
+              "target": "Package",
+              "version": "[10.0.10, )"
             }
           },
           "imports": [

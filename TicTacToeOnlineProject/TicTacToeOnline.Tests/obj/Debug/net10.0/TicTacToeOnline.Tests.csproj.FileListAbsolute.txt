@@ -107,3 +107,17 @@ D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\obj\Debug\
 D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\obj\Debug\net10.0\TicTacToeOnline.Tests.pdb
 D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\obj\Debug\net10.0\TicTacToeOnline.Tests.genruntimeconfig.cache
 D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\obj\Debug\net10.0\ref\TicTacToeOnline.Tests.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\bin\Debug\net10.0\Microsoft.AspNetCore.Connections.Abstractions.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\bin\Debug\net10.0\Microsoft.AspNetCore.Http.Connections.Client.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\bin\Debug\net10.0\Microsoft.AspNetCore.Http.Connections.Common.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\bin\Debug\net10.0\Microsoft.AspNetCore.SignalR.Client.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\bin\Debug\net10.0\Microsoft.AspNetCore.SignalR.Client.Core.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\bin\Debug\net10.0\Microsoft.AspNetCore.SignalR.Common.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\bin\Debug\net10.0\Microsoft.AspNetCore.SignalR.Protocols.Json.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\bin\Debug\net10.0\Microsoft.Extensions.DependencyInjection.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\bin\Debug\net10.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\bin\Debug\net10.0\Microsoft.Extensions.Features.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\bin\Debug\net10.0\Microsoft.Extensions.Logging.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\bin\Debug\net10.0\Microsoft.Extensions.Logging.Abstractions.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\bin\Debug\net10.0\Microsoft.Extensions.Options.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline.Tests\bin\Debug\net10.0\Microsoft.Extensions.Primitives.dll
