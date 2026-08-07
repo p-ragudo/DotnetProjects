@@ -4,7 +4,7 @@ public class Board
 {
     public readonly char[] _cells = new char[9];
 
-    public char[] GetBoardState() => (char[])_cells.Clone();
+    public char[] GetBoard() => (char[])_cells.Clone();
 
     public (char, string) GetCell(int index)
     {
