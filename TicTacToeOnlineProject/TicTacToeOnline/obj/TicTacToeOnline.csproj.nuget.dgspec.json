@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj": {}
+    "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj": {}
   },
   "projects": {
-    "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj": {
+    "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
+        "projectUniqueName": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
         "projectName": "TicTacToeOnline",
-        "projectPath": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
+        "projectPath": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
         "packagesPath": "C:\\Users\\Paolo Ragudo\\.nuget\\packages\\",
-        "outputPath": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\obj\\",
+        "outputPath": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Paolo Ragudo\\AppData\\Roaming\\NuGet\\NuGet.Config"

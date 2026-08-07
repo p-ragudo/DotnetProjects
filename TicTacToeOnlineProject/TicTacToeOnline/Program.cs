@@ -1,7 +1,11 @@
+using TicTacToeOnline.Data;
 using TicTacToeOnline.Hubs;
+using TicTacToeOnline.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSingleton<IGameStore, InMemoryGameStore>();
+builder.Services.AddTransient<BoardService>();
 builder.Services.AddSignalR();
 
 builder.Services.AddCors(options =>
@@ -9,10 +13,10 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy
-            .WithOrigins("http://localhost:3000", "http://localhost:5173") // Your frontend URLs
+            .WithOrigins("http://localhost:3000", "http://localhost:5173")
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials(); // Required for SignalR WebSockets
+            .AllowCredentials();
     });
 });
 

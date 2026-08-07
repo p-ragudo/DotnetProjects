@@ -33,7 +33,34 @@ try
 {
     Console.WriteLine("Connecting to the game server...");
     await connection.StartAsync();
-    Console.WriteLine($"Connected. Your connection ID is {connection.ConnectionId}");
+
+    Console.Write("Enter Game ID to join: ");
+    string? gameId = Console.ReadLine();
+
+    if (!string.IsNullOrWhiteSpace(gameId))
+    {
+        // Invoke server method to join room
+        await connection.InvokeAsync("JoinGameRoom", gameId);
+    }
+
+    // 4. Input Loop: Read player moves from the terminal and push over WebSockets
+    while (connection.State == HubConnectionState.Connected)
+    {
+        string? input = Console.ReadLine();
+        if (int.TryParse(input, out int cellIndex))
+        {
+            // Invoke server method to make move
+            await connection.InvokeAsync("MakeMove", gameId, cellIndex);
+        }
+        else if (input?.ToLower() == "quit")
+        {
+            break;
+        }
+        else
+        {
+            Console.WriteLine("Invalid input. Enter a number from 0 to 8 (or 'quit'):");
+        }
+    }
 }
 catch (Exception ex)
 {

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline.Tests\\TicTacToeOnline.Tests.csproj": {}
+    "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline.Tests\\TicTacToeOnline.Tests.csproj": {}
   },
   "projects": {
-    "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline.Tests\\TicTacToeOnline.Tests.csproj": {
+    "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline.Tests\\TicTacToeOnline.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline.Tests\\TicTacToeOnline.Tests.csproj",
+        "projectUniqueName": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline.Tests\\TicTacToeOnline.Tests.csproj",
         "projectName": "TicTacToeOnline.Tests",
-        "projectPath": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline.Tests\\TicTacToeOnline.Tests.csproj",
+        "projectPath": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline.Tests\\TicTacToeOnline.Tests.csproj",
         "packagesPath": "C:\\Users\\Paolo Ragudo\\.nuget\\packages\\",
-        "outputPath": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline.Tests\\obj\\",
+        "outputPath": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline.Tests\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Paolo Ragudo\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -26,8 +26,8 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj": {
-                "projectPath": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj"
+              "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj": {
+                "projectPath": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj"
               }
             }
           }
@@ -359,14 +359,14 @@
         }
       }
     },
-    "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj": {
+    "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
+        "projectUniqueName": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
         "projectName": "TicTacToeOnline",
-        "projectPath": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
+        "projectPath": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
         "packagesPath": "C:\\Users\\Paolo Ragudo\\.nuget\\packages\\",
-        "outputPath": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\obj\\",
+        "outputPath": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Paolo Ragudo\\AppData\\Roaming\\NuGet\\NuGet.Config"

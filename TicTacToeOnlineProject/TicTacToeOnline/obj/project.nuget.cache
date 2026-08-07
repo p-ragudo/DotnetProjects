@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "HKUIzqMVq0w=",
+  "dgSpecHash": "PIFjKEixHiY=",
   "success": true,
-  "projectFilePath": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
+  "projectFilePath": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Paolo Ragudo\\.nuget\\packages\\microsoft.aspnetcore.http.connections.client\\10.0.10\\microsoft.aspnetcore.http.connections.client.10.0.10.nupkg.sha512",
     "C:\\Users\\Paolo Ragudo\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.7\\microsoft.aspnetcore.openapi.10.0.7.nupkg.sha512",
@@ -15,9 +15,9 @@
       "code": "NU1903",
       "level": "Warning",
       "message": "Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc",
-      "projectPath": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
+      "projectPath": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
       "warningLevel": 1,
-      "filePath": "d:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
+      "filePath": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
       "libraryId": "Microsoft.OpenApi",
       "targetGraphs": [
         "net10.0"
