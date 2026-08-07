@@ -1,10 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "RGSzW3VV2dk=",
+  "dgSpecHash": "PIFjKEixHiY=",
   "success": true,
   "projectFilePath": "D:\\DOTNET\\DotnetProjects\\TicTacToeOnlineProject\\TicTacToeOnline\\TicTacToeOnline.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\Paolo Ragudo\\.nuget\\packages\\microsoft.aspnetcore.http.connections.client\\10.0.10\\microsoft.aspnetcore.http.connections.client.10.0.10.nupkg.sha512",
     "C:\\Users\\Paolo Ragudo\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.7\\microsoft.aspnetcore.openapi.10.0.7.nupkg.sha512",
+    "C:\\Users\\Paolo Ragudo\\.nuget\\packages\\microsoft.aspnetcore.signalr.client\\10.0.10\\microsoft.aspnetcore.signalr.client.10.0.10.nupkg.sha512",
+    "C:\\Users\\Paolo Ragudo\\.nuget\\packages\\microsoft.aspnetcore.signalr.client.core\\10.0.10\\microsoft.aspnetcore.signalr.client.core.10.0.10.nupkg.sha512",
     "C:\\Users\\Paolo Ragudo\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512"
   ],
   "logs": [

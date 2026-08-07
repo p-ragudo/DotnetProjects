@@ -32,3 +32,6 @@ D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline\obj\Debug\net10.
 D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline\obj\Debug\net10.0\TicTacToeOnline.pdb
 D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline\obj\Debug\net10.0\TicTacToeOnline.genruntimeconfig.cache
 D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline\obj\Debug\net10.0\ref\TicTacToeOnline.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline\bin\Debug\net10.0\Microsoft.AspNetCore.Http.Connections.Client.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline\bin\Debug\net10.0\Microsoft.AspNetCore.SignalR.Client.dll
+D:\DOTNET\DotnetProjects\TicTacToeOnlineProject\TicTacToeOnline\bin\Debug\net10.0\Microsoft.AspNetCore.SignalR.Client.Core.dll

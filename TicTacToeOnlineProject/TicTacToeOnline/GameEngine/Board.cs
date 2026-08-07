@@ -5,6 +5,7 @@ public class Board
     public readonly char[] _cells = new char[9];
 
     public char[] GetBoard() => (char[])_cells.Clone();
+    public string BoardId { get; } = Guid.NewGuid().ToString();
 
     public (char, string) GetCell(int index)
     {
