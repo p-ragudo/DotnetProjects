@@ -8,10 +8,11 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:5173") // Your frontend URLs
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials(); // Required for SignalR WebSockets
+        policy
+            .WithOrigins("http://localhost:3000", "http://localhost:5173") // Your frontend URLs
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // Required for SignalR WebSockets
     });
 });
 
