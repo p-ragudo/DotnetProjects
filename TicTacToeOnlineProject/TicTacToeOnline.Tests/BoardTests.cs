@@ -1,4 +1,5 @@
-﻿using TicTacToeOnline.GameEngine;
+﻿using TicTacToeOnline.Enums;
+using TicTacToeOnline.GameEngine;
 
 namespace TicTacToeOnline.Tests;
 
@@ -7,104 +8,99 @@ public class BoardTests
     private readonly Board _board = new();
 
     [Fact]
-    public void GetCell_ReturnsNoCharAndErrorMessageForIndexNine()
+    public void GetCell_ReturnsNoCharAndIndexOutOfRangeForIndexNine()
     {
         const int index = 9;
 
-        var (playerMark, message) = _board.GetCell(index);
+        var (playerMark, boardOperationStatus) = _board.GetCell(index);
 
         Assert.Equal('\0', playerMark);
-        Assert.Equal("Index out of range", message);
+        Assert.Equal(BoardOperationStatus.IndexOutOfRange, boardOperationStatus);
     }
 
     [Fact]
-    public void GetCell_ReturnsNoCharAndErrorMessageForIndexNegativeOne()
+    public void GetCell_ReturnsNoCharAndIndexOutOfRangeForIndexNegativeOne()
     {
         const int index = -1;
 
-        var (playerMark, message) = _board.GetCell(index);
+        var (playerMark, boardOperationStatus) = _board.GetCell(index);
 
         Assert.Equal('\0', playerMark);
-        Assert.Equal("Index out of range", message);
+        Assert.Equal(BoardOperationStatus.IndexOutOfRange, boardOperationStatus);
     }
 
     [Fact]
-    public void GetCell_ReturnsNoCharAndSuccessMessage()
+    public void GetCell_ReturnsNoCharAndSuccess()
     {
         const int index = 0;
 
-        var (playerMark, message) = _board.GetCell(index);
+        var (playerMark, boardOperationStatus) = _board.GetCell(index);
 
         Assert.Equal('\0', playerMark);
-        Assert.Equal("Cell fetch success", message);
+        Assert.Equal(BoardOperationStatus.Success, boardOperationStatus);
     }
 
     [Fact]
-    public void GetCell_ReturnsXAndSuccessMessage()
+    public void GetCell_ReturnsXAndSuccess()
     {
         const int index = 0;
         _board.TryMakeMove(index, 'X');
 
-        var (playerMark, message) = _board.GetCell(index);
+        var (playerMark, boardOperationStatus) = _board.GetCell(index);
 
         Assert.Equal('X', playerMark);
-        Assert.Equal("Cell fetch success", message);
+        Assert.Equal(BoardOperationStatus.Success, boardOperationStatus);
     }
 
     [Fact]
-    public void TryMakeMove_ReturnsTrueAndSuccessMessage()
+    public void TryMakeMove_ReturnsSuccess()
     {
         const int index = 0;
-        var (isSuccessful, message) = _board.TryMakeMove(index, 'X');
+        var boardOperationStatus = _board.TryMakeMove(index, 'X');
 
-        Assert.True(isSuccessful);
-        Assert.Equal("Move success", message);
+        Assert.Equal(BoardOperationStatus.Success, boardOperationStatus);
     }
 
     [Fact]
-    public void TryMakeMove_ReturnsFalseAndIndexOutOfRangeMessageForIndexNine()
+    public void TryMakeMove_ReturnsIndexOutOfRangeForIndexNine()
     {
         const int index = 9;
 
-        var (isSuccessful, message) = _board.TryMakeMove(index, 'X');
+        var boardOperationStatus = _board.TryMakeMove(index, 'X');
 
-        Assert.False(isSuccessful);
-        Assert.Equal("Index out of range", message);
+        Assert.Equal(BoardOperationStatus.IndexOutOfRange, boardOperationStatus);
     }
 
     [Fact]
-    public void TryMakeMove_ReturnsFalseAndIndexOutOfRangeMessageForIndexNegativeOne()
+    public void TryMakeMove_ReturnsIndexOutOfRangeForIndexNegativeOne()
     {
         const int index = -1;
 
-        var (isSuccessful, message) = _board.TryMakeMove(index, 'X');
+        var boardOperationStatus = _board.TryMakeMove(index, 'X');
 
-        Assert.False(isSuccessful);
-        Assert.Equal("Index out of range", message);
+        Assert.Equal(BoardOperationStatus.IndexOutOfRange, boardOperationStatus);
     }
 
     [Fact]
-    public void TryMakeMove_ReturnsFalseAndCellNotEmptyMessageWithInputX()
+    public void TryMakeMove_ReturnsCellNotEmptyWithInputX()
     {
         const int index = 0;
         _board.TryMakeMove(index, 'X');
 
-        var (isSuccessful, message) = _board.TryMakeMove(index, 'X');
+        var boardOperationStatus = _board.TryMakeMove(index, 'X');
 
-        Assert.False(isSuccessful);
-        Assert.Equal("Cell not empty", message);
+        Assert.Equal(BoardOperationStatus.CellNotEmpty, boardOperationStatus);
     }
 
     [Fact]
-    public void TryMakeMove_ReturnsFalseAndCellNotEmptyMessageWithInputO()
+    public void TryMakeMove_ReturnsCellNotEmptyWithInputO()
     {
         const int index = 0;
         _board.TryMakeMove(index, 'X');
 
-        var (isSuccessful, message) = _board.TryMakeMove(index, 'O');
+        var boardOperationStatus = _board.TryMakeMove(index, 'O');
 
-        Assert.False(isSuccessful);
-        Assert.Equal("Cell not empty", message);
+        Assert.Equal(BoardOperationStatus.CellNotEmpty, boardOperationStatus);
     }
 
     [Fact]
