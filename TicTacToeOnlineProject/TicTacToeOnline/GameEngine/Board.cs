@@ -1,3 +1,5 @@
+using TicTacToeOnline.Enums;
+
 namespace TicTacToeOnline.GameEngine;
 
 public class Board
@@ -7,30 +9,38 @@ public class Board
     public char[] GetBoard() => (char[])_cells.Clone();
     public string BoardId { get; } = Guid.NewGuid().ToString();
 
-    public (char, string) GetCell(int index)
+    public (char, BoardOperationStatus) GetCell(int index)
     {
         if (index is < 0 or > 8)
         {
-            return ('\0', "Index out of range");
+            return ('\0', BoardOperationStatus.IndexOutOfRange);
         }
 
-        return (_cells[index], "Cell fetch success");
+        return (_cells[index], BoardOperationStatus.Success);
     }
 
-    public (bool, string) TryMakeMove(int index, char playerMark)
+    /// <summary>
+    /// Write operation to an index in a board
+    /// </summary>
+    /// <param name="index">A number between 0-8 inclusive. Specifies which cell to perform the write operation.</param>
+    /// <param name="playerMark">Specifies the character that gets written to a cell in a board</param>
+    /// <returns>
+    /// <para>BoardOperationReturnStatus: Success, IndexOutOfRange, CellNotEmpty</para>
+    /// </returns>
+    public BoardOperationStatus TryMakeMove(int index, char playerMark)
     {
         if (index is < 0 or > 8)
         {
-            return (false, "Index out of range");
+            return BoardOperationStatus.IndexOutOfRange;
         }
 
         if (_cells[index] != 0)
         {
-            return (false, "Cell not empty");
+            return BoardOperationStatus.CellNotEmpty;
         }
 
         _cells[index] = playerMark;
-        return (true, "Move success");
+        return BoardOperationStatus.Success;
     }
 
     /// <summary>
@@ -98,7 +108,7 @@ public class Board
                 return (true, piece);
             }
 
-            start ++;
+            start++;
         }
 
         // Check all diagonal
