@@ -8,25 +8,25 @@ public class InMemoryGameStore : IGameStore
 {
     private readonly ConcurrentDictionary<string, Board> _games = new();
 
-    public (bool, GameStoreReturnStatus) CreateBoard()
+    public async Task<(Board?, GameStoreReturnStatus)> CreateBoard()
     {
         var board = new Board();
 
         if (_games.TryAdd(board.BoardId, board))
         {
-            return (true, GameStoreReturnStatus.CreateBoardSuccess);
+            return (board, GameStoreReturnStatus.CreateBoardSuccess);
         }
         else
         {
-            return (false, GameStoreReturnStatus.ErrorCreatingBoard);
+            return (null, GameStoreReturnStatus.ErrorCreatingBoard);
         }
     }
 
-    public (Board?, GameStoreReturnStatus) GetBoardById(string boardId)
+    public async Task<(Board?, GameStoreReturnStatus)> GetBoardById(string boardId)
     {
         if (_games.TryGetValue(boardId, out Board? value))
         {
-            return (value, GameStoreReturnStatus.BoardDoesNotExist);
+            return (value, GameStoreReturnStatus.GetBoardSuccess);
         }
         else
         {
@@ -34,7 +34,7 @@ public class InMemoryGameStore : IGameStore
         }
     }
 
-    public (bool, GameStoreReturnStatus) RemoveBoardById(string boardId)
+    public async Task<(bool, GameStoreReturnStatus)> RemoveBoardById(string boardId)
     {
         if (_games.TryRemove(boardId, out _))
         {

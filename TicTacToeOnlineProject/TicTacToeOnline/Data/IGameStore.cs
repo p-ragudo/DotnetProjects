@@ -5,7 +5,7 @@ namespace TicTacToeOnline.Data;
 
 public interface IGameStore
 {
-    public (bool, GameStoreReturnStatus) CreateBoard();
-    public (Board?, GameStoreReturnStatus) GetBoardById(string boardId);
-    public (bool, GameStoreReturnStatus) RemoveBoardById(string boardId);
+    public Task<(Board?, GameStoreReturnStatus)> CreateBoard();
+    public Task<(Board?, GameStoreReturnStatus)> GetBoardById(string boardId);
+    public Task<(bool, GameStoreReturnStatus)> RemoveBoardById(string boardId);
 }

@@ -10,24 +10,34 @@ public enum BoardOperationStatus
 public enum GameStoreReturnStatus
 {
     CreateBoardSuccess,
+    GetBoardSuccess,
     ErrorCreatingBoard,
     BoardDoesNotExist,
     RemoveBoardSuccess,
-    ErrorRemovingBoard
+    ErrorRemovingBoard,
+    BoardNullException
 }
 
-public enum JoinGameErrorType
+public enum JoinGameReturnStatus
 {
+    GameJoinSuccess,
     BoardNotFound,
     BoardNullException
 }
 
-public enum MoveErrorType
+public enum MoveErrorReturnStatus
 {
+    MoveSuccess,
     BoardNotFound,
     BoardNullException,
     IndexOutOfRange,
     NotYourTurn,
     CellNotEmpty,
     GameFinished
+}
+
+public enum GameClientResponse
+{
+    PlayerJoinSuccess,
+    BoardUpdated
 }

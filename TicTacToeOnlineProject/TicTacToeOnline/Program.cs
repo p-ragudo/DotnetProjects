@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using TicTacToeOnline.Data;
 using TicTacToeOnline.Hubs;
 using TicTacToeOnline.Services;
@@ -6,7 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<IGameStore, InMemoryGameStore>();
 builder.Services.AddTransient<BoardService>();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR()
+    .AddJsonProtocol(options =>
+    {
+        options.PayloadSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter()
+        );
+    });
 
 builder.Services.AddCors(options =>
 {

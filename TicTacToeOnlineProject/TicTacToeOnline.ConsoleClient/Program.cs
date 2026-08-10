@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using TicTacToeOnline.ConsoleClient;
 
 Console.Title = "TicTacToe Console Test Client";
 
@@ -8,9 +9,26 @@ var connection = new HubConnectionBuilder()
     .WithAutomaticReconnect()
     .Build();
 
-connection.On<char>("PlayerJoined", (assignedMark) =>
+connection.On<CreateGameResponse>("OnCreateGame", (response) =>
 {
-    Console.WriteLine($"\n[SYSTEM] Successfully connected! You are playing as: '{assignedMark}'");
+    Console.WriteLine($"\n[SYSTEM] Successfully created new game with ID: {response.BoardDto.BoardId}");
+});
+
+connection.On<JoinGameResponse>("PlayerJoined", (response) =>
+{
+    if (response?.BoardDto != null)
+    {
+        Console.WriteLine($"\n[SYSTEM] Player joined game ID: {response.BoardDto.BoardId}");
+    }
+    else
+    {
+        Console.WriteLine("\n[ERROR] response.BoardDto is null");
+    }
+});
+
+connection.On<string>("NotifyGroupOnPlayerJoin", (connectionId) =>
+{
+    Console.WriteLine($"\n[SYSTEM] Player with ID {connectionId} has joined the game");
 });
 
 connection.On<string, char[]>("GameUpdated", (statusMessage, boardState) =>
@@ -34,33 +52,43 @@ try
     Console.WriteLine("Connecting to the game server...");
     await connection.StartAsync();
 
-    Console.Write("Enter Game ID to join: ");
-    string? gameId = Console.ReadLine();
+    Console.WriteLine("\n[SYSTEM] Connected Succesfully!");
 
-    if (!string.IsNullOrWhiteSpace(gameId))
+    Console.WriteLine("1. Create Game\n2. Join Game");
+
+    var answer = Console.ReadLine();
+
+    string boardId;
+    if (answer == "1")
     {
-        // Invoke server method to join room
-        await connection.InvokeAsync("JoinGameRoom", gameId);
+        Console.WriteLine("\n[SYSTEM] Creating game...");
+        var createGameResponse = await connection.InvokeAsync<CreateGameResponse>("CreateGame");
+
+        if (createGameResponse!.BoardDto == null)
+        {
+            Console.WriteLine("\n[ERROR] Error. Board could not be fetched");
+            return;
+        }
+
+        boardId = createGameResponse.BoardDto.BoardId;
+
+        await connection.InvokeAsync<JoinGameResponse>("JoinGameRoom", boardId);
+        Console.WriteLine($"\n[SYSTEM] Created & joined game room: {boardId}");
+    }
+    else
+    {
+        Console.WriteLine("Enter game id: ");
+        boardId = Console.ReadLine()!;
+        var joinGameResponse = await connection.InvokeAsync<JoinGameResponse>("JoinGameRoom", boardId);
+        if (joinGameResponse == null || !joinGameResponse.Success)
+        {
+            Console.WriteLine($"\n[ERROR] Failed to join game.");
+            return;
+        }
+        Console.WriteLine("\n[SYSTEM] Joined game successfully!");
     }
 
-    // 4. Input Loop: Read player moves from the terminal and push over WebSockets
-    while (connection.State == HubConnectionState.Connected)
-    {
-        string? input = Console.ReadLine();
-        if (int.TryParse(input, out int cellIndex))
-        {
-            // Invoke server method to make move
-            await connection.InvokeAsync("MakeMove", gameId, cellIndex);
-        }
-        else if (input?.ToLower() == "quit")
-        {
-            break;
-        }
-        else
-        {
-            Console.WriteLine("Invalid input. Enter a number from 0 to 8 (or 'quit'):");
-        }
-    }
+    await Task.Delay(-1);
 }
 catch (Exception ex)
 {
