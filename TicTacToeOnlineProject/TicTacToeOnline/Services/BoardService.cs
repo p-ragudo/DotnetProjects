@@ -2,6 +2,7 @@ using TicTacToeOnline.Data;
 using TicTacToeOnline.Dto;
 using TicTacToeOnline.Enums;
 using TicTacToeOnline.Extensions;
+using TicTacToeOnline.GameEngine;
 
 namespace TicTacToeOnline.Services;
 
@@ -29,6 +30,22 @@ public class BoardService
         return CreateGameResponse.Ok(board.ToDto());
     }
 
+    public async Task<BoardResponse> GetBoardByIdAsync(string boardId)
+    {
+        var (board, returnStatus) = await _gameStore.GetBoardById(boardId);
+        if (returnStatus == GameStoreReturnStatus.BoardDoesNotExist)
+        {
+            return BoardResponse.Failed(BoardReturnStatus.BoardDoesNotExist);
+        }
+        if (board == null)
+        {
+            Console.Error.WriteLine("BoardNullException at TicTacToeOnline.BoardService.GetBoardByIdAsync");
+            return BoardResponse.Failed(BoardReturnStatus.BoardNullException);
+        }
+
+        return BoardResponse.Ok(BoardReturnStatus.BoardFetchSuccess, board.ToDto());
+    }
+
     public async Task<JoinGameResponse> JoinGameAsync(string boardId)
     {
         var (board, returnStatus) = await _gameStore.GetBoardById(boardId);
@@ -45,31 +62,31 @@ public class BoardService
         return JoinGameResponse.Ok(board.ToDto());
     }
 
-    public async Task<MoveResult> MakeMoveAsync(string boardId, int move, char playerMark)
+    public async Task<MoveResponse> MakeMoveAsync(string boardId, int move, char playerMark)
     {
         var (board, returnStatus) = await _gameStore.GetBoardById(boardId);
         if (returnStatus == GameStoreReturnStatus.BoardDoesNotExist)
         {
-            return MoveResult.Failed(MoveErrorReturnStatus.BoardNotFound);
+            return MoveResponse.Failed(MoveReturnStatus.BoardNotFound);
         }
         if (board == null)
         {
             Console.Error.WriteLine("BoardNullException at TicTacToeOnline.BoardService.MakeMoveAsync");
-            return MoveResult.Failed(MoveErrorReturnStatus.BoardNullException);
+            return MoveResponse.Failed(MoveReturnStatus.BoardNullException);
         }
 
         var boardOperationReturnStatus = board.TryMakeMove(move, playerMark);
         if (boardOperationReturnStatus == BoardOperationStatus.IndexOutOfRange)
         {
-            return MoveResult.Failed(MoveErrorReturnStatus.IndexOutOfRange);
+            return MoveResponse.Failed(MoveReturnStatus.IndexOutOfRange);
         }
         if (boardOperationReturnStatus == BoardOperationStatus.CellNotEmpty)
         {
-            return MoveResult.Failed(MoveErrorReturnStatus.CellNotEmpty);
+            return MoveResponse.Failed(MoveReturnStatus.CellNotEmpty);
         }
 
         var (isWin, winningMark) = board.CheckForWin();
 
-        return MoveResult.Ok(board.ToDto(), isWin, isWin ? winningMark : null);
+        return MoveResponse.Ok(board.ToDto(), isWin, isWin ? winningMark : null);
     }
 }

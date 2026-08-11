@@ -1,5 +1,6 @@
 using TicTacToeOnline.Dto;
 using TicTacToeOnline.Enums;
+using TicTacToeOnline.GameEngine;
 
 namespace TicTacToeOnline.Hubs;
 
@@ -10,7 +11,8 @@ public interface IGameClient
     Task NotifyGroupOnPlayerJoin(string connectionId);
 
     // Broadcasted to everyone in a game room whenever the board or game status updates
-    Task GameUpdated(GameClientResponse response, char[]? boardState);
+    Task GameUpdated(BoardDto boardDto);
+    Task GameOver(BoardDto boardDto, string winnerConnectionId);
 
     // Sent directly to a single connection if an action fails
     Task ErrorOccured(GameClientResponse response);

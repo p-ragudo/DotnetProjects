@@ -12,7 +12,7 @@ public class InMemoryGameStore : IGameStore
     {
         var board = new Board();
 
-        if (_games.TryAdd(board.BoardId, board))
+        if (_games.TryAdd(board.Id, board))
         {
             return (board, GameStoreReturnStatus.CreateBoardSuccess);
         }

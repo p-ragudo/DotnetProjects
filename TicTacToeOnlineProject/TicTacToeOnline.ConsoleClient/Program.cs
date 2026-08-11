@@ -9,11 +9,6 @@ var connection = new HubConnectionBuilder()
     .WithAutomaticReconnect()
     .Build();
 
-connection.On<CreateGameResponse>("OnCreateGame", (response) =>
-{
-    Console.WriteLine($"\n[SYSTEM] Successfully created new game with ID: {response.BoardDto.BoardId}");
-});
-
 connection.On<JoinGameResponse>("PlayerJoined", (response) =>
 {
     if (response?.BoardDto != null)
@@ -26,17 +21,21 @@ connection.On<JoinGameResponse>("PlayerJoined", (response) =>
     }
 });
 
-connection.On<string>("NotifyGroupOnPlayerJoin", (connectionId) =>
-{
-    Console.WriteLine($"\n[SYSTEM] Player with ID {connectionId} has joined the game");
-});
+connection.On<string>("NotifyGroupOnPlayerJoin", static (connectionId)
+    => Console.WriteLine($"\n[SYSTEM] Player with ID {connectionId} has joined the game"));
 
-connection.On<string, char[]>("GameUpdated", (statusMessage, boardState) =>
+connection.On<BoardDto>("GameUpdated", (dto) =>
 {
     Console.Clear();
-    Console.WriteLine($"Status: {statusMessage}\n");
-    RenderBoard(boardState);
+    RenderBoard(dto.Grid);
     Console.Write("\nEnter cell index (0-8) to make a move: ");
+});
+
+connection.On<BoardDto, string>("GameOver", (dto, winnerConnectionId) =>
+{
+    Console.Clear();
+    RenderBoard(dto.Grid);
+    Console.WriteLine($"\n[SYSTEM] Player {winnerConnectionId} has won the game!");
 });
 
 connection.On<string>("ErrorOccured", (errorMessage) =>
@@ -79,8 +78,9 @@ try
     {
         Console.WriteLine("Enter game id: ");
         boardId = Console.ReadLine()!;
+
         var joinGameResponse = await connection.InvokeAsync<JoinGameResponse>("JoinGameRoom", boardId);
-        if (joinGameResponse == null || !joinGameResponse.Success)
+        if (joinGameResponse?.Success is not true)
         {
             Console.WriteLine($"\n[ERROR] Failed to join game.");
             return;
@@ -88,7 +88,40 @@ try
         Console.WriteLine("\n[SYSTEM] Joined game successfully!");
     }
 
-    await Task.Delay(-1);
+    string[] initCells = new string[9];
+    RenderBoard(initCells);
+    Console.WriteLine("\n[SYSTEM] Game initialized. Enter cell index (0-8) to make a move, or 'q' to quit.");
+
+    while (true)
+    {
+        Console.Write("\nEnter cell index (0-8): ");
+        var input = await Task.Run(() => Console.ReadLine());
+
+        if (string.Equals(input?.Trim(), "q", StringComparison.OrdinalIgnoreCase))
+        {
+            Console.WriteLine("Exiting game...");
+            break;
+        }
+
+        if (int.TryParse(input, out int cellIndex) && cellIndex >= 0 && cellIndex <= 8)
+        {
+            try
+            {
+                // Send move invocation to the hub
+                await connection.InvokeAsync("MakeMove", boardId, cellIndex, 'X');
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"\n[ERROR] Failed to send move: {ex.Message}");
+                Console.ResetColor();
+            }
+        }
+        else
+        {
+            Console.WriteLine("Invalid input. Please enter a number between 0 and 8.");
+        }
+    }
 }
 catch (Exception ex)
 {
@@ -100,15 +133,20 @@ finally
     Console.WriteLine("Disconnected!");
 }
 
-static void RenderBoard(char[] cells)
+static void RenderBoard(string[] cells)
 {
+    if (cells == null || cells.Length < 9) return;
+
+    Console.WriteLine("-------------");
     for (int i = 0; i < 9; i++)
     {
-        if ((i + 2) % 3 == 0)
-        {
-            Console.WriteLine();
-        }
+        string displayChar = cells[i] == "" ? " " : cells[i];
+        Console.Write($"| {displayChar} ");
 
-        Console.Write($"  {cells[i]}  ");
+        if ((i + 1) % 3 == 0)
+        {
+            Console.WriteLine("|");
+            Console.WriteLine("-------------");
+        }
     }
 }

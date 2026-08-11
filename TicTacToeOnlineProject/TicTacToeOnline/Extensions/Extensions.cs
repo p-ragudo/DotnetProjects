@@ -9,7 +9,7 @@ public static class BoardMappingExtensions
     {
         return new BoardDto
         {
-            BoardId = board.BoardId,
+            BoardId = board.Id,
             Grid = board.GetBoard()
                 .Select(c => c == '\0' ? string.Empty : c.ToString())
                 .ToArray()

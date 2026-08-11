@@ -1,4 +1,5 @@
 using TicTacToeOnline.Enums;
+using TicTacToeOnline.Utils;
 
 namespace TicTacToeOnline.GameEngine;
 
@@ -7,7 +8,7 @@ public class Board
     public readonly char[] _cells = new char[9];
 
     public char[] GetBoard() => (char[])_cells.Clone();
-    public string BoardId { get; } = Guid.NewGuid().ToString();
+    public string Id { get; } = CodeGenerator.Generate();
 
     public (char, BoardOperationStatus) GetCell(int index)
     {

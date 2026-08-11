@@ -45,24 +45,37 @@ public record JoinGameResponse
         };
 }
 
-public record MoveResult
+public record MoveResponse
 {
     public bool Success { get; init; }
-    public MoveErrorReturnStatus Status { get; init; }
+    public MoveReturnStatus Status { get; init; }
     public BoardDto? UpdatedBoardDto { get; init; }
     public bool IsGameOver { get; init; }
     public char? WinnerId { get; init; }
 
-    public static MoveResult Failed(MoveErrorReturnStatus status)
+    public static MoveResponse Failed(MoveReturnStatus status)
         => new() { Success = false, Status = status };
 
-    public static MoveResult Ok(BoardDto boardDto, bool isGameOver = false, char? winnerId = null)
+    public static MoveResponse Ok(BoardDto boardDto, bool isGameOver = false, char? winnerId = null)
         => new()
         {
             Success = true,
-            Status = MoveErrorReturnStatus.MoveSuccess,
+            Status = MoveReturnStatus.MoveSuccess,
             UpdatedBoardDto = boardDto,
             IsGameOver = isGameOver,
             WinnerId = winnerId
         };
+}
+
+public record BoardResponse
+{
+    public bool Success { get; init; }
+    public BoardReturnStatus Status { get; init; }
+    public BoardDto? BoardDto { get; init; }
+
+    public static BoardResponse Failed(BoardReturnStatus status)
+        => new() { Success = false, Status = status };
+
+    public static BoardResponse Ok(BoardReturnStatus status, BoardDto boardDto)
+        => new() { Success = true, Status = status, BoardDto = boardDto };
 }

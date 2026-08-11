@@ -25,7 +25,7 @@ public enum JoinGameReturnStatus
     BoardNullException
 }
 
-public enum MoveErrorReturnStatus
+public enum MoveReturnStatus
 {
     MoveSuccess,
     BoardNotFound,
@@ -34,6 +34,13 @@ public enum MoveErrorReturnStatus
     NotYourTurn,
     CellNotEmpty,
     GameFinished
+}
+
+public enum BoardReturnStatus
+{
+    BoardFetchSuccess,
+    BoardDoesNotExist,
+    BoardNullException
 }
 
 public enum GameClientResponse
