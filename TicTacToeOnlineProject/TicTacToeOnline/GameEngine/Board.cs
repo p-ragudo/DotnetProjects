@@ -9,6 +9,8 @@ public class Board
 
     public char[] GetBoard() => (char[])_cells.Clone();
     public string Id { get; } = CodeGenerator.Generate();
+    public char CurrentTurn { get; private set; } = 'X';
+    public int PlayerJoined { get; private set; } = 0;
 
     public (char, BoardOperationStatus) GetCell(int index)
     {
@@ -19,6 +21,20 @@ public class Board
 
         return (_cells[index], BoardOperationStatus.Success);
     }
+
+    public void SwitchTurn()
+    {
+        if (CurrentTurn == 'X')
+        {
+            CurrentTurn = 'O';
+        }
+        else
+        {
+            CurrentTurn = 'X';
+        }
+    }
+
+    public void IncrementPlayerCount() => PlayerJoined++;
 
     /// <summary>
     /// Write operation to an index in a board
@@ -34,7 +50,10 @@ public class Board
         {
             return BoardOperationStatus.IndexOutOfRange;
         }
-
+        if (playerMark != CurrentTurn)
+        {
+            return BoardOperationStatus.NotCurrentTurn;
+        }
         if (_cells[index] != 0)
         {
             return BoardOperationStatus.CellNotEmpty;

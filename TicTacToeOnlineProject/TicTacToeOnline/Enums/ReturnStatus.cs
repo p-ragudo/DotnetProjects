@@ -4,13 +4,22 @@ public enum BoardOperationStatus
 {
     Success,
     IndexOutOfRange,
-    CellNotEmpty
+    CellNotEmpty,
+    NotCurrentTurn
+}
+
+public enum AssignMarkStatus
+{
+    Success,
+    InvalidMark,
+    AlreadyAssigned
 }
 
 public enum GameStoreReturnStatus
 {
     CreateBoardSuccess,
     GetBoardSuccess,
+    GameFull,
     ErrorCreatingBoard,
     BoardDoesNotExist,
     RemoveBoardSuccess,
@@ -21,6 +30,7 @@ public enum GameStoreReturnStatus
 public enum JoinGameReturnStatus
 {
     GameJoinSuccess,
+    GameFull,
     BoardNotFound,
     BoardNullException
 }
@@ -31,7 +41,7 @@ public enum MoveReturnStatus
     BoardNotFound,
     BoardNullException,
     IndexOutOfRange,
-    NotYourTurn,
+    NotCurrentTurn,
     CellNotEmpty,
     GameFinished
 }

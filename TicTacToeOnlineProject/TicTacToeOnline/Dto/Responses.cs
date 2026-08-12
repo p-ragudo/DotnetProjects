@@ -7,6 +7,7 @@ public record BoardDto
 {
     public string BoardId { get; init; } = string.Empty;
     public string[] Grid { get; init; } = new string[9];
+    public char CurrentTurn { get; init; }
 }
 
 public record CreateGameResponse

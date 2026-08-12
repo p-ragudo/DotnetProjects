@@ -12,7 +12,8 @@ public static class BoardMappingExtensions
             BoardId = board.Id,
             Grid = board.GetBoard()
                 .Select(c => c == '\0' ? string.Empty : c.ToString())
-                .ToArray()
+                .ToArray(),
+            CurrentTurn = board.CurrentTurn
         };
     }
 }

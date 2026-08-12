@@ -58,7 +58,12 @@ public class BoardService
             Console.Error.WriteLine("BoardNullException at TicTacToeOnline.BoardService.JoinGameAsync");
             return JoinGameResponse.Failed(JoinGameReturnStatus.BoardNullException);
         }
+        if (board.PlayerJoined == 2)
+        {
+            return JoinGameResponse.Failed(JoinGameReturnStatus.GameFull);
+        }
 
+        board.IncrementPlayerCount();
         return JoinGameResponse.Ok(board.ToDto());
     }
 
@@ -80,11 +85,16 @@ public class BoardService
         {
             return MoveResponse.Failed(MoveReturnStatus.IndexOutOfRange);
         }
+        if (boardOperationReturnStatus == BoardOperationStatus.NotCurrentTurn)
+        {
+            return MoveResponse.Failed(MoveReturnStatus.NotCurrentTurn);
+        }
         if (boardOperationReturnStatus == BoardOperationStatus.CellNotEmpty)
         {
             return MoveResponse.Failed(MoveReturnStatus.CellNotEmpty);
         }
 
+        board.SwitchTurn();
         var (isWin, winningMark) = board.CheckForWin();
 
         return MoveResponse.Ok(board.ToDto(), isWin, isWin ? winningMark : null);
