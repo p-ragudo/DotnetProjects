@@ -13,6 +13,7 @@ public interface IGameClient
     // Broadcasted to everyone in a game room whenever the board or game status updates
     Task GameUpdated(BoardDto boardDto);
     Task GameOver(BoardDto boardDto, string winnerConnectionId);
+    Task SendCurrentTurn(char mark);
 
     // Sent directly to a single connection if an action fails
     Task ErrorOccured(GameClientResponse response);

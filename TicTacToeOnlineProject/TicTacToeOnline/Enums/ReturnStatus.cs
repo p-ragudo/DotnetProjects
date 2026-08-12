@@ -12,7 +12,9 @@ public enum AssignMarkStatus
 {
     Success,
     InvalidMark,
-    AlreadyAssigned
+    AlreadyAssigned,
+    BoardNotFound,
+    BoardNullException
 }
 
 public enum GameStoreReturnStatus

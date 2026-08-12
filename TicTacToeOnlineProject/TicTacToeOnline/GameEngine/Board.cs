@@ -11,6 +11,8 @@ public class Board
     public string Id { get; } = CodeGenerator.Generate();
     public char CurrentTurn { get; private set; } = 'X';
     public int PlayerJoined { get; private set; } = 0;
+    public bool XAssigned { get; private set; } = false;
+    public bool OAssigned { get; private set; } = false;
 
     public (char, BoardOperationStatus) GetCell(int index)
     {
@@ -35,6 +37,29 @@ public class Board
     }
 
     public void IncrementPlayerCount() => PlayerJoined++;
+
+    public AssignMarkStatus Assignmark(char mark)
+    {
+        var upperMark = char.ToUpper(mark);
+
+        if (upperMark != 'X' && upperMark != 'O')
+        {
+            return AssignMarkStatus.InvalidMark;
+        }
+
+        if (upperMark == 'X' && !XAssigned)
+        {
+            XAssigned = true;
+            return AssignMarkStatus.Success;
+        }
+        if (upperMark == 'O' && !OAssigned)
+        {
+            OAssigned = true;
+            return AssignMarkStatus.Success;
+        }
+
+        return AssignMarkStatus.AlreadyAssigned;
+    }
 
     /// <summary>
     /// Write operation to an index in a board

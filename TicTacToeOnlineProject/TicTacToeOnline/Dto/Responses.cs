@@ -46,6 +46,24 @@ public record JoinGameResponse
         };
 }
 
+public record AssignMarkResponse
+{
+    public bool Success { get; init; }
+    public AssignMarkStatus Status { get; init; }
+    public char? Mark { get; init; }
+
+    public static AssignMarkResponse Failed(AssignMarkStatus status)
+        => new() { Success = false, Status = status};
+
+    public static AssignMarkResponse Ok(char mark)
+        => new()
+        {
+            Success = true,
+            Status = AssignMarkStatus.Success,
+            Mark = mark
+        };
+}
+
 public record MoveResponse
 {
     public bool Success { get; init; }

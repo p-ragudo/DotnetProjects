@@ -67,6 +67,39 @@ public class BoardService
         return JoinGameResponse.Ok(board.ToDto());
     }
 
+    public async Task<AssignMarkResponse> GetMarkAsync(string boardId)
+    {
+        var (board, returnStatus) = await _gameStore.GetBoardById(boardId);
+        if (returnStatus == GameStoreReturnStatus.BoardDoesNotExist)
+        {
+            return AssignMarkResponse.Failed(AssignMarkStatus.BoardNotFound);
+        }
+        if (board == null)
+        {
+            Console.Error.WriteLine("BoardNullException at TicTacToeOnline.BoardService.JoinGameAsync");
+            return AssignMarkResponse.Failed(AssignMarkStatus.BoardNullException);
+        }
+
+        var mark = board.GetMark();
+        return AssignMarkResponse.Ok(mark);
+    }
+
+    public async Task<char?> GetCurrentTurn(string boardId)
+    {
+        var (board, returnStatus) = await _gameStore.GetBoardById(boardId);
+        if (returnStatus == GameStoreReturnStatus.BoardDoesNotExist)
+        {
+            return null;
+        }
+        if (board == null)
+        {
+            Console.Error.WriteLine("BoardNullException at TicTacToeOnline.BoardService.GetCurrentTurn");
+            return null;
+        }
+
+        return board.CurrentTurn;
+    }
+
     public async Task<MoveResponse> MakeMoveAsync(string boardId, int move, char playerMark)
     {
         var (board, returnStatus) = await _gameStore.GetBoardById(boardId);

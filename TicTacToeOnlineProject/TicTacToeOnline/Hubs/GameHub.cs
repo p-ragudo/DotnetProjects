@@ -33,6 +33,12 @@ public class GameHub : Hub<IGameClient>
         return response;
     }
 
+    public async Task<AssignMarkResponse> GetMark(string gameId)
+    {
+        var response = await _boardService.GetMarkAsync(gameId);
+        return response;
+    }
+
     public async Task<MoveResponse> MakeMove(string gameId, int cellIndex, char playerMark)
     {
         var response = await _boardService.MakeMoveAsync(gameId, cellIndex, playerMark);
