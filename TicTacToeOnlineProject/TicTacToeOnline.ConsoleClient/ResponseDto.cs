@@ -31,7 +31,7 @@ public class AssignMarkResponse
 public class MoveResult
 {
     public bool Success { get; set; }
-    public string Status { get; set; }
+    public string Status { get; set; } = string.Empty;
     public BoardDto? BoardDto { get; set; } = new();
     public bool IsGameOver { get; set; }
     public char? WinnerId { get; init; }
