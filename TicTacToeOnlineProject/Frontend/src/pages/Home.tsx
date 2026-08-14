@@ -1,8 +1,49 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSignalR } from "../context/SignalRContext";
+import StylizedButton from "../components/StylizedButton";
+
+export type PlayerMark = 'X' | 'O' | '';
+
+export interface BoardDto {
+  boardId: string
+  grid: string[]
+  currentTurn: PlayerMark
+}
+
+export interface CreateGameResponse {
+  success: boolean
+  status: string
+  boardDto: BoardDto | null
+}
 
 export default function Home() {
+  const { connection, isConnected } = useSignalR();
   const [tab, setTab] = useState<"create" | "join">("create");
   const [roomCode, setRoomCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!connection || !isConnected) return
+
+  }, [connection, isConnected])
+
+  const handleCreateRoom = async () => {
+    try {
+      setIsLoading(true)
+
+      const response = await connection?.invoke<CreateGameResponse>("CreateGame")
+
+      if (response?.success) {
+        console.log("Game created with ID: ", response.boardDto?.boardId)
+      } else {
+        console.error("Failed to create game: ", response?.status)
+      }
+    } catch (err) {
+      console.error('Error invoking CreateGameAsync at Home.tsx:', err);
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -38,26 +79,22 @@ export default function Home() {
 
         {/* Tab Switcher */}
         <div className="mb-6 flex rounded-xl border-[2.5px] border-[#1E293B] bg-[#FFFBEA] p-1 shadow-[2px_2px_0px_0px_#1E293B]">
-          <button
-            onClick={() => setTab("create")}
-            className={`flex-1 rounded-lg py-2.5 text-sm font-bold transition-all ${
-              tab === "create"
-                ? "border-2 border-[#1E293B] bg-[#FACC15] text-[#1E293B] shadow-[2px_2px_0px_0px_#1E293B]"
-                : "text-slate-600 hover:text-[#1E293B]"
-            }`}
-          >
-            Create room
-          </button>
-          <button
-            onClick={() => setTab("join")}
-            className={`flex-1 rounded-lg py-2.5 text-sm font-bold transition-all ${
-              tab === "join"
-                ? "border-2 border-[#1E293B] bg-[#FACC15] text-[#1E293B] shadow-[2px_2px_0px_0px_#1E293B]"
-                : "text-slate-600 hover:text-[#1E293B]"
-            }`}
-          >
-            Join room
-          </button>
+          <StylizedButton
+            functionCallback={() => setTab("create")} 
+            isVisible={tab === "create"}
+            text="Create room"
+            color="bg-[#FACC15]"
+            largeBorder={false}
+            hasHover={false}
+          />
+          <StylizedButton
+            functionCallback={() => setTab("join")} 
+            isVisible={tab === "join"}
+            text="Join room"
+            color="bg-[#FACC15]"
+            largeBorder={false}
+            hasHover={false}
+          />
         </div>
 
         {/* Tab Content */}
@@ -66,7 +103,10 @@ export default function Home() {
             <p className="mb-6 text-sm font-semibold leading-relaxed text-slate-700 text-center">
               Get a room code to send your opponent.
             </p>
-            <button className="w-full rounded-xl border-[2.5px] border-[#1E293B] bg-[#FACC15] py-3.5 text-base font-bold text-[#1E293B] shadow-[4px_4px_0px_0px_#1E293B] transition-all hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0px_0px_#1E293B]">
+            <button
+              onClick={handleCreateRoom} 
+              className="w-full rounded-xl border-[2.5px] border-[#1E293B] bg-[#FACC15] py-3.5 text-base font-bold text-[#1E293B] shadow-[4px_4px_0px_0px_#1E293B] transition-all hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0px_0px_#1E293B]"
+            >
               Create room
             </button>
           </div>
@@ -87,6 +127,41 @@ export default function Home() {
             </button>
           </div>
         )}
+
+        <p className="mb-3 text-sm font-semibold leading-relaxed text-slate-700 text-center">
+          {
+            tab === "create"
+            ? "Get a room code to send your opponent."
+            : "Enter the room code shared by your opponent:"
+          }
+        </p>
+
+        { tab === "join" &&
+          <input
+            type="text"
+            placeholder="e.g. AAY4Z"
+            value={roomCode}
+            onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+            className="mb-6 w-full rounded-xl border-[2.5px] border-[#1E293B] bg-[#FFFBEA] p-3 text-center text-lg font-black uppercase tracking-widest text-[#1E293B] placeholder-slate-400 outline-none focus:ring-2 focus:ring-[#FACC15]"
+          />
+        }
+
+        <StylizedButton
+          functionCallback={
+            tab === "create"
+            ? handleCreateRoom
+            : () => console.log("joined room")
+          } 
+          isVisible={true}
+          text={
+            tab === "create"
+            ? "Create room"
+            : "Join room"
+          }
+          color="bg-[#FACC15]"
+          largeBorder={true}
+          hasHover={true}
+        />
       </div>
 
       {/* Footer Text */}
