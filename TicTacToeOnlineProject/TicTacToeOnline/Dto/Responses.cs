@@ -70,19 +70,19 @@ public record MoveResponse
     public MoveReturnStatus Status { get; init; }
     public BoardDto? UpdatedBoardDto { get; init; }
     public bool IsGameOver { get; init; }
-    public char? WinnerId { get; init; }
+    public char? WinnerMark { get; init; }
 
     public static MoveResponse Failed(MoveReturnStatus status)
         => new() { Success = false, Status = status };
 
-    public static MoveResponse Ok(BoardDto boardDto, bool isGameOver = false, char? winnerId = null)
+    public static MoveResponse Ok(BoardDto boardDto, bool isGameOver = false, char? winnerMark = null)
         => new()
         {
             Success = true,
             Status = MoveReturnStatus.MoveSuccess,
             UpdatedBoardDto = boardDto,
             IsGameOver = isGameOver,
-            WinnerId = winnerId
+            WinnerMark = winnerMark
         };
 }
 

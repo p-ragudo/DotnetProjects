@@ -27,6 +27,7 @@ public class BoardService
             return CreateGameResponse.Failed(GameStoreReturnStatus.BoardNullException);
         }
 
+        Console.WriteLine($"Created game {board.Id}");
         return CreateGameResponse.Ok(board.ToDto());
     }
 
@@ -46,7 +47,7 @@ public class BoardService
         return BoardResponse.Ok(BoardReturnStatus.BoardFetchSuccess, board.ToDto());
     }
 
-    public async Task<JoinGameResponse> JoinGameAsync(string boardId)
+    public async Task<JoinGameResponse> JoinGameAsync(string boardId, string connectionId)
     {
         var (board, returnStatus) = await _gameStore.GetBoardById(boardId);
         if (returnStatus == GameStoreReturnStatus.BoardDoesNotExist)
@@ -58,12 +59,17 @@ public class BoardService
             Console.Error.WriteLine("BoardNullException at TicTacToeOnline.BoardService.JoinGameAsync");
             return JoinGameResponse.Failed(JoinGameReturnStatus.BoardNullException);
         }
-        if (board.PlayerJoined == 2)
+        if (board.PlayerIds.Contains(connectionId))
+        {
+            return JoinGameResponse.Ok(board.ToDto());
+        }
+        if (board.PlayerIds.Count >= 2)
         {
             return JoinGameResponse.Failed(JoinGameReturnStatus.GameFull);
         }
 
-        board.IncrementPlayerCount();
+        board.PlayerIds.Add(connectionId);
+        Console.WriteLine($"Client {connectionId} has joined game {board.Id}");
         return JoinGameResponse.Ok(board.ToDto());
     }
 

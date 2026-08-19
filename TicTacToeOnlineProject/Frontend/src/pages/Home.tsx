@@ -1,98 +1,174 @@
 import { useState } from "react";
+import { useSignalR } from "../context/SignalRContext";
+import { useNavigate } from "react-router-dom";
+import LoadingContainer from "../components/LoadingContainer";
+import LobbyContainer from "../components/LobbyContainer";
+import ConnectionFailed from "../components/ConnectionFailed";
+
+const IS_DEV_MODE = true;
+
+export type GameStoreReturnStatus = 
+  | "CreateBoardSuccess"
+  | "GetBoardSuccess"
+  | "GameFull"
+  | "ErrorCreatingBoard"
+  | "BoardDoesNotExist"
+  | "RemoveBoardSuccess"
+  | "ErrorRemovingBoard"
+  | "BoardNullException";
+export type JoinGameReturnStatus = 
+  | "GameJoinSuccess"
+  | "GameFull"
+  | "BoardNotFound"
+  | "BoardNullException"
+export type AssignMarkStatus = 
+  | "Success"
+  | "InvalidMark"
+  | "AlreadyAssigned"
+  | "BoardNotFound"
+  | "BoardNullException"
+
+export interface BoardDto {
+  boardId: string;
+  grid: string[];
+  currentTurn: string;
+}
+
+export interface CreateGameResponse {
+  success: boolean;
+  status: GameStoreReturnStatus
+  boardDto: BoardDto | null;
+}
+
+export interface JoinGameResponse {
+  success: boolean;
+  status: JoinGameReturnStatus;
+  boardDto: BoardDto | null;
+}
+
+export interface AssignMarkResponse {
+  success: boolean
+  status: AssignMarkResponse
+  mark: string | null
+}
+
+type DevViewMode = "auto" | "connecting" | "failed" | "action-loading" | "lobby";
 
 export default function Home() {
+  const navigate = useNavigate();
+  const { connection, isConnected, isInitialLoading, reconnect } = useSignalR();
   const [tab, setTab] = useState<"create" | "join">("create");
-  const [roomCode, setRoomCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [devMode, setDevMode] = useState<DevViewMode>("auto");
+  const [error, setError] = useState("")
+
+  const handleCreateRoom = async () => {
+    setIsLoading(true);
+
+    try {
+      const createGameResponse = await connection?.invoke<CreateGameResponse>("CreateGame");
+      if (createGameResponse == null || !createGameResponse.success) {
+        setError("Failed to create game")
+        console.error("Failed to create game:", createGameResponse?.status);
+        return
+      }
+
+      navigate(`/room/${createGameResponse.boardDto?.boardId}`)
+    } catch (err) {
+      console.error("Error invoking CreateGame:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleJoinRoom = async (roomCode: string) => {
+    const code = roomCode.trim().toUpperCase();
+    if (!code) return;
+    navigate(`/room/${code}`)
+  };
+
+  const handleReconnect = async () => {
+    setIsRetrying(true);
+
+    try {
+      await reconnect();
+    } catch (err) {
+      console.error("Manual reconnect failed:", err);
+    } finally {
+      setIsRetrying(false);
+    }
+  };
+
+  const renderCurrentView = () => {
+    if (IS_DEV_MODE && devMode !== "auto") {
+      if (devMode === "connecting") return <LoadingContainer text="Connecting to server" styleSelected="bg-[#FACC15]" />;
+      if (devMode === "failed") {
+        return (
+          <div className="w-full max-w-sm mx-auto flex flex-col items-center">
+            <ConnectionFailed text="Failed to connect to the server" functionCallback={handleReconnect} />
+          </div>
+        );
+      }
+      if (devMode === "action-loading") return <LoadingContainer text="Loading" styleSelected="bg-[#FACC15]" />;
+      if (devMode === "lobby") {
+        return (
+          <LobbyContainer 
+            setTab={setTab}
+            selectedTab={tab}
+            handleCreateRoom={handleCreateRoom}
+            handleJoinRoom={handleJoinRoom}
+          />
+        );
+      }
+    }
+
+    if (isInitialLoading || isRetrying) {
+      return <LoadingContainer text="Connecting to server" styleSelected="bg-[#FACC15]" />;
+    }
+
+    if (!isConnected) {
+      return (
+        <div className="w-full max-w-sm mx-auto flex flex-col items-center">
+          <ConnectionFailed text="Failed to connect to the server" functionCallback={handleReconnect} />
+        </div>
+      );
+    }
+
+    if (isLoading) {
+      return <LoadingContainer text="Loading" styleSelected="bg-[#FACC15]" />;
+    }
+
+    return (
+      <LobbyContainer 
+        setTab={setTab}
+        selectedTab={tab}
+        handleCreateRoom={handleCreateRoom}
+        handleJoinRoom={handleJoinRoom}
+      />
+    );
+  };
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      {/* Main Card Container */}
-      <div className="w-full rounded-4xl border-[3px] border-[#1E293B] bg-white p-8 shadow-[8px_8px_0px_0px_#1E293B]">
-        {/* Header Section */}
-        <div className="mb-6 flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border-[2.5px] border-[#1E293B] bg-[#FACC15] shadow-[3px_3px_0px_0px_#1E293B]">
-            <svg
-              className="h-8 w-8 text-[#1E293B]"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+    <>
+      {IS_DEV_MODE && (
+        <div className="fixed top-3 left-3 z-50 flex flex-wrap gap-1.5 rounded-lg border border-[#1E293B] bg-white p-1.5 shadow-md">
+          {(["auto", "connecting", "failed", "action-loading", "lobby"] as DevViewMode[]).map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => setDevMode(mode)}
+              className={`rounded px-2 py-1 text-xs font-bold transition-all ${
+                devMode === mode ? "bg-[#1E293B] text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              }`}
             >
-              <line x1="8" y1="3" x2="8" y2="21" />
-              <line x1="16" y1="3" x2="16" y2="21" />
-              <line x1="3" y1="8" x2="21" y2="8" />
-              <line x1="3" y1="16" x2="21" y2="16" />
-            </svg>
-          </div>
-          <div>
-            <h1 className="text-2xl font-black tracking-tight text-[#1E293B]">
-              Tic Tac Toe!
-            </h1>
-            <p className="text-sm font-semibold text-slate-500">
-              play a friend, anywhere
-            </p>
-          </div>
-        </div>
-
-        {/* Tab Switcher */}
-        <div className="mb-6 flex rounded-xl border-[2.5px] border-[#1E293B] bg-[#FFFBEA] p-1 shadow-[2px_2px_0px_0px_#1E293B]">
-          <button
-            onClick={() => setTab("create")}
-            className={`flex-1 rounded-lg py-2.5 text-sm font-bold transition-all ${
-              tab === "create"
-                ? "border-2 border-[#1E293B] bg-[#FACC15] text-[#1E293B] shadow-[2px_2px_0px_0px_#1E293B]"
-                : "text-slate-600 hover:text-[#1E293B]"
-            }`}
-          >
-            Create room
-          </button>
-          <button
-            onClick={() => setTab("join")}
-            className={`flex-1 rounded-lg py-2.5 text-sm font-bold transition-all ${
-              tab === "join"
-                ? "border-2 border-[#1E293B] bg-[#FACC15] text-[#1E293B] shadow-[2px_2px_0px_0px_#1E293B]"
-                : "text-slate-600 hover:text-[#1E293B]"
-            }`}
-          >
-            Join room
-          </button>
-        </div>
-
-        {/* Tab Content */}
-        {tab === "create" ? (
-          <div>
-            <p className="mb-6 text-sm font-semibold leading-relaxed text-slate-700 text-center">
-              Get a room code to send your opponent.
-            </p>
-            <button className="w-full rounded-xl border-[2.5px] border-[#1E293B] bg-[#FACC15] py-3.5 text-base font-bold text-[#1E293B] shadow-[4px_4px_0px_0px_#1E293B] transition-all hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0px_0px_#1E293B]">
-              Create room
+              {mode}
             </button>
-          </div>
-        ) : (
-          <div>
-            <p className="mb-3 text-sm font-semibold leading-relaxed text-slate-700 text-center">
-              Enter the room code shared by your opponent:
-            </p>
-            <input
-              type="text"
-              placeholder="e.g. AAY4Z"
-              value={roomCode}
-              onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-              className="mb-6 w-full rounded-xl border-[2.5px] border-[#1E293B] bg-[#FFFBEA] p-3 text-center text-lg font-black uppercase tracking-widest text-[#1E293B] placeholder-slate-400 outline-none focus:ring-2 focus:ring-[#FACC15]"
-            />
-            <button className="w-full rounded-xl border-[2.5px] border-[#1E293B] bg-[#FACC15] py-3.5 text-base font-bold text-[#1E293B] shadow-[4px_4px_0px_0px_#1E293B] transition-all hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0px_0px_#1E293B]">
-              Join room
-            </button>
-          </div>
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {/* Footer Text */}
-      <p className="text-xs font-semibold text-slate-400">
-        No account needed — the room code is the only key.
-      </p>
-    </div>
+      {renderCurrentView()}
+    </>
   );
 }
