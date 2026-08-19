@@ -8,7 +8,7 @@ export interface LobbyContainerProps {
   setTab: (tab: Tab) => void;
   selectedTab: Tab;
   handleCreateRoom: () => void;
-  handleJoinRoom: () => void;
+  handleJoinRoom: (roomCode: string) => void;
 }
 
 export default function LobbyContainer({
@@ -146,7 +146,7 @@ export default function LobbyContainer({
                 className="mb-6 w-full rounded-xl border-[2.5px] border-[#1E293B] bg-[#FFFBEA] p-3 text-center text-lg font-black uppercase tracking-widest text-[#1E293B] placeholder-slate-400 outline-none focus:ring-2 focus:ring-[#FACC15]"
               />
               <StylizedButton
-                functionCallback={handleJoinRoom}
+                functionCallback={() => handleJoinRoom(roomCode)}
                 isSelected={true}
                 hasHover={true}
                 text="Join room"

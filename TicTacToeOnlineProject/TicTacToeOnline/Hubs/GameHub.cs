@@ -22,12 +22,12 @@ public class GameHub : Hub<IGameClient>
 
     public async Task<JoinGameResponse> JoinGameRoom(string gameId)
     {
-        var response = await _boardService.JoinGameAsync(gameId);
+        var response = await _boardService.JoinGameAsync(gameId, Context.ConnectionId);
 
         if (response.Success)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
-            await Clients.OthersInGroup(gameId).NotifyGroupOnPlayerJoin(Context.ConnectionId);
+            await Clients.OthersInGroup(gameId).NotifyGroupOnPlayerJoin();
         }
 
         return response;
@@ -49,7 +49,7 @@ public class GameHub : Hub<IGameClient>
         }
         if (response.IsGameOver)
         {
-            await Clients.Group(gameId).GameOver(response.UpdatedBoardDto!, Context.ConnectionId);
+            await Clients.Group(gameId).GameOver(response.UpdatedBoardDto!, (char)response.WinnerMark);
             return response;
         }
 

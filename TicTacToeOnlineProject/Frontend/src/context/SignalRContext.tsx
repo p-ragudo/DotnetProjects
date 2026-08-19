@@ -43,7 +43,7 @@ export const SignalRProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   useEffect(() => {
     const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:5267/hubs/game')
+      .withUrl('http://192.168.18.152:5267/hubs/game')
       .withAutomaticReconnect()
       .build();
 

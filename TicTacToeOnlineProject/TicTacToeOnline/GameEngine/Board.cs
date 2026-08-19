@@ -10,7 +10,7 @@ public class Board
     public char[] GetBoard() => (char[])_cells.Clone();
     public string Id { get; } = CodeGenerator.Generate();
     public char CurrentTurn { get; private set; } = 'X';
-    public int PlayerJoined { get; private set; } = 0;
+    public HashSet<string> PlayerIds { get; } = [];
     public bool XAssigned { get; private set; } = false;
     public bool OAssigned { get; private set; } = false;
 
@@ -35,8 +35,6 @@ public class Board
             CurrentTurn = 'X';
         }
     }
-
-    public void IncrementPlayerCount() => PlayerJoined++;
 
     public AssignMarkStatus Assignmark(char mark)
     {
