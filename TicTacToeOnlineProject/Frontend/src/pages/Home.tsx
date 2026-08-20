@@ -6,7 +6,7 @@ import LobbyContainer from "../components/LobbyContainer";
 import ConnectionFailed from "../components/ConnectionFailed";
 import StylizedButton from "../components/StylizedButton";
 
-const IS_DEV_MODE = true;
+const IS_DEV_MODE = false;
 
 export type GameStoreReturnStatus = 
   | "CreateBoardSuccess"
