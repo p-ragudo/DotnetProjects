@@ -41,7 +41,7 @@ export const SignalRProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [startConnection]);
 
-  const hubUrl = import.meta.env.VITE_SIGNALR_HUB_URL
+  const hubUrl = import.meta.env.VITE_SIGNALR_HUB_URL || 'http://192.168.18.152:5267/hubs/game';
 
   useEffect(() => {
     const newConnection = new signalR.HubConnectionBuilder()
