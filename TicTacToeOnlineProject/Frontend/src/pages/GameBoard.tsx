@@ -46,6 +46,59 @@ interface Particle {
   rotation: number;
 }
 
+// Web Audio API sound synthesizers
+function playWinSound() {
+  try {
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new AudioCtx();
+    const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6 (Fanfare)
+
+    notes.forEach((freq, index) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + index * 0.12);
+
+      gain.gain.setValueAtTime(0.2, ctx.currentTime + index * 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + index * 0.12 + 0.35);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(ctx.currentTime + index * 0.12);
+      osc.stop(ctx.currentTime + index * 0.12 + 0.4);
+    });
+  } catch (err) {
+    console.warn("Audio playback error:", err);
+  }
+}
+
+function playLoseSound() {
+  try {
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "sawtooth";
+    // Descending sad slide tone
+    osc.frequency.setValueAtTime(320, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.6);
+
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.65);
+  } catch (err) {
+    console.warn("Audio playback error:", err);
+  }
+}
+
 export default function GameBoard() {
   const navigate = useNavigate();
   const { connection, isConnected, isInitialLoading, reconnect } = useSignalR();
@@ -76,6 +129,14 @@ export default function GameBoard() {
     }
 
     const isWinner = winner === playerMark;
+
+    // Trigger theme sound effect
+    if (isWinner) {
+      playWinSound();
+    } else {
+      playLoseSound();
+    }
+
     const count = isWinner ? 45 : 30;
     const colors = isWinner
       ? ["#FACC15", "#3B82F6", "#10B981", "#EF4444", "#EC4899", "#8B5CF6"]
