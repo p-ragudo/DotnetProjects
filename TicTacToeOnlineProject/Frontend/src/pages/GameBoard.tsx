@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSignalR } from "../context/SignalRContext";
 import StylizedButton from "../components/StylizedButton";
@@ -13,19 +13,31 @@ export type MoveReturnStatus =
   | "IndexOutOfRange"
   | "NotCurrentTurn"
   | "CellNotEmpty"
-  | "GameFinished"
+  | "GameFinished";
+
+export type RematchReturnStatus = 
+  | "BoardNotFound"
+  | "BoardNullException"
+  | "Waiting"
+  | "RematchAccepted"
+  | "RematchDenied";
 
 export interface MoveResponse {
   success: boolean;
-  status?: MoveReturnStatus;
-  updatedBoardDto?: BoardDto;
+  status: MoveReturnStatus | null;
+  updatedBoardDto: BoardDto | null;
   isGameOver: boolean;
-  winnerMark: string | null
+  winnerMark: string | null;
 }
 
+export interface RematchResponse {
+  success: boolean;
+  status: RematchReturnStatus;
+  boardDto: BoardDto | null;
+}
 
 export default function GameBoard() {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const { connection, isConnected, isInitialLoading, reconnect } = useSignalR();
 
   const { roomCode } = useParams<"roomCode">();
@@ -37,15 +49,19 @@ export default function GameBoard() {
   const [winner, setWinner] = useState<string | null>(null);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isWaitingForOpponent, setIsWaitingForOpponent] = useState(true);
+  const [isRematchRequested, setIsRematchRequested] = useState(false);
+  const [hasIncomingRematch, setHasIncomingRematch] = useState(false);
+  const [opponentLeft, setOpponentLeft] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isRetrying, setIsRetrying] = useState(false)
-  const hasJoinedRef = useRef(false)
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const hasJoinedRef = useRef(false);
 
   useEffect(() => {
-    if (!roomCode) return
+    if (!roomCode) return;
 
     async function initGame() {
-      setLoading(true)
+      setLoading(true);
 
       if (!roomCode || !connection || hasJoinedRef.current) return;
       hasJoinedRef.current = true;
@@ -53,26 +69,32 @@ export default function GameBoard() {
       try {
         const joinGameResponse = await connection?.invoke<JoinGameResponse>(
           "JoinGameRoom", roomCode
-        )
+        );
         if (joinGameResponse == null || !joinGameResponse.success) {
-          setErrorMessage("Failed to join game")
-          console.error("Failed to join game:", joinGameResponse?.status)
-          return
+          setErrorMessage("Failed to join game");
+          console.error("Failed to join game:", joinGameResponse?.status);
+          return;
         }
 
         const getMarkResponse = await connection?.invoke<AssignMarkResponse>(
           "GetMark", roomCode
-        )
+        );
         if (getMarkResponse == null || !getMarkResponse.success) {
-          setErrorMessage("Failed to get assigned mark")
-          console.error("Failed to get assigned mark:", getMarkResponse?.status)
-          return
+          setErrorMessage("Failed to get assigned mark");
+          console.error("Failed to get assigned mark:", getMarkResponse?.status);
+          return;
         }
 
-        setBoardDto(joinGameResponse.boardDto)
-        setCurrentTurn(joinGameResponse.boardDto?.currentTurn!)
-        setPlayerMark(getMarkResponse.mark)
-        setOpponentMark(playerMark === 'X' ? 'O' : 'X')
+        const assignedMark = getMarkResponse.mark;
+
+        setBoardDto(joinGameResponse.boardDto);
+        setCurrentTurn(joinGameResponse.boardDto?.currentTurn!);
+        setPlayerMark(assignedMark);
+        setOpponentMark(assignedMark?.trim().toUpperCase() === 'X' ? 'O' : 'X');
+
+        if (joinGameResponse.boardDto && joinGameResponse.boardDto.playersPresent >= 2) {
+          setIsWaitingForOpponent(false);
+        }
       } catch (err) {
         console.error("Error in GameBoard.useEffect.initGame:", err);
       } finally {
@@ -81,35 +103,83 @@ export default function GameBoard() {
     }
 
     const handleNotifyGroupOnPlayerJoin = () => {
-      setIsWaitingForOpponent(false)
+      setIsWaitingForOpponent(false);
+      setOpponentLeft(false);
+    };
+
+    const handleNotifyGroupOnPlayerLeave = () => {
+      setOpponentLeft(true);
     }
 
-    const handleGameUpdated = (boardDto: BoardDto) => {
-      setBoardDto(boardDto)
-      setCurrentTurn(boardDto.currentTurn)
-    }
+    const handleGameUpdated = (board: BoardDto) => {
+      setBoardDto(board);
+      setCurrentTurn(board.currentTurn);
+    };
 
-    const handleGameOver = (boardDto: BoardDto, winnerMark: string) => {
-      setBoardDto(boardDto)
-      setWinner(winnerMark)
-      setIsGameOver(true)
-    }
+    const handleGameOver = (board: BoardDto, winnerMark: string) => {
+      setBoardDto(board);
+      setWinner(winnerMark === "D" ? "Draw" : winnerMark);
+      setIsGameOver(true);
+    };
 
-    connection?.on("NotifyGroupOnPlayerJoin", handleNotifyGroupOnPlayerJoin)
-    connection?.on("GameUpdated", handleGameUpdated)
-    connection?.on("GameOver", handleGameOver)
+    const handleRematchRequest = (response: RematchResponse) => {
+      if (response.status === "Waiting") {
+        setHasIncomingRematch(true);
+      } else if (response.status === "RematchAccepted" && response.boardDto) {
+        const updatedBoard = response.boardDto;
 
-    initGame()
+        // Synchronize current player's new mark
+        if (connection?.connectionId && updatedBoard.playerMarks) {
+          const myNewMark = updatedBoard.playerMarks[connection.connectionId];
+          if (myNewMark) {
+            setPlayerMark(myNewMark);
+            setOpponentMark(myNewMark.toUpperCase() === "X" ? "O" : "X");
+          }
+        }
+
+        setBoardDto(updatedBoard);
+        setCurrentTurn(updatedBoard.currentTurn);
+        setIsGameOver(false);
+        setWinner(null);
+        setIsRematchRequested(false);
+        setHasIncomingRematch(false);
+        setErrorMessage(null);
+      } else if (response.status === "RematchDenied") {
+        setIsRematchRequested(false);
+        setHasIncomingRematch(false);
+        setErrorMessage("Opponent declined the rematch");
+      }
+    };
+
+    connection?.on("NotifyGroupOnPlayerJoin", handleNotifyGroupOnPlayerJoin);
+    connection?.on("NotifyGroupOnPlayerLeave", handleNotifyGroupOnPlayerLeave);
+    connection?.on("GameUpdated", handleGameUpdated);
+    connection?.on("GameOver", handleGameOver);
+    connection?.on("RematchRequest", handleRematchRequest);
+
+    initGame();
 
     return () => {
-      connection?.off("NotifyGroupOnPlayerJoin", handleNotifyGroupOnPlayerJoin)
-      connection?.off("GameUpdated", handleGameUpdated)
-      connection?.off("GameOver", handleGameOver)
-    }
-  }, [roomCode, connection])
+      connection?.off("NotifyGroupOnPlayerJoin", handleNotifyGroupOnPlayerJoin);
+      connection?.off("NotifyGroupOnPlayerLeave", handleNotifyGroupOnPlayerLeave);
+      connection?.off("GameUpdated", handleGameUpdated);
+      connection?.off("GameOver", handleGameOver);
+      connection?.off("RematchRequest", handleRematchRequest);
+    };
+  }, [roomCode, connection]);
 
-  const isMyTurn = () => currentTurn === playerMark
-  const handleLeave = () => navigate("/")
+  const isMyTurn = () => currentTurn === playerMark;
+
+  const handleLeave = async () => {
+    if (roomCode) {
+      try {
+        await connection?.invoke("LeaveGame", roomCode);
+      } catch (err) {
+        console.error("Error leaving game:", err);
+      }
+    }
+    navigate("/");;
+  }
 
   const handleCellClick = async (index: number) => {
     try {
@@ -118,41 +188,100 @@ export default function GameBoard() {
         roomCode,
         index,
         playerMark
-      )
+      );
 
       if (response == null || !response?.success) {
-        setErrorMessage("Failed to execute move. Please try again")
-        console.error("Failed to execute move:", response?.status)
-        return
+        setErrorMessage("Failed to execute move. Please try again");
+        console.error("Failed to execute move:", response?.status);
+        return;
       }
 
       if (response.status === "CellNotEmpty") {
-        setErrorMessage("Cell is not empty. Please try again")
-        console.error("Invalid player move, cell not empty")
-        return
+        setErrorMessage("Cell is not empty. Please try again");
+        return;
       }
 
       if (response.status === "NotCurrentTurn") {
-        setErrorMessage("Not your turn. Please wait for opponent")
-        console.error("Invalid player move, not their current turn")
-        return
+        setErrorMessage("Not your turn. Please wait for opponent");
+        return;
       }
     } catch (err) {
       console.error("Error in GameBoard.handleCellClick:", err);
-    } finally {
-      setLoading(false);
     }
-  }
+  };
+
+  const handleRematch = async () => {
+    try {
+      setIsRematchRequested(true);
+      await connection?.invoke("Rematch", roomCode, true);
+    } catch (err) {
+      console.error("Error sending rematch request:", err);
+      setIsRematchRequested(false);
+    }
+  };
+
+  const handleAcceptRematch = async () => {
+    try {
+      setHasIncomingRematch(false);
+
+      const response = await connection?.invoke<RematchResponse>("Rematch", roomCode, true);
+      
+      if (response && response.status === "RematchAccepted" && response.boardDto) {
+        setBoardDto(response.boardDto);
+        setCurrentTurn(response.boardDto.currentTurn);
+        setIsGameOver(false);
+        setWinner(null);
+        setIsRematchRequested(false);
+        setErrorMessage(null);
+      }
+    } catch (err) {
+      console.error("Error accepting rematch:", err);
+    }
+  };
+
+  const handleDeclineRematch = async () => {
+    try {
+      await connection?.invoke("Rematch", roomCode, false);
+      setHasIncomingRematch(false);
+    } catch (err) {
+      console.error("Error declining rematch:", err);
+    }
+  };
 
   const handleReconnect = async () => {
     setIsRetrying(true);
-    
     try {
       await reconnect();
     } catch (err) {
       console.error("Manual reconnect failed:", err);
     } finally {
       setIsRetrying(false);
+    }
+  };
+
+  const handleCopyRoomCode = async () => {
+    if (!roomCode) return;
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(roomCode);
+      } else {
+        // Fallback for non-HTTPS / local IP testing
+        const textArea = document.createElement("textarea");
+        textArea.value = roomCode;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy code:", err);
     }
   };
 
@@ -168,15 +297,52 @@ export default function GameBoard() {
     return <LoadingContainer text="Connecting to server" styleSelected="bg-[#FACC15]" />;
   }
 
-  // Only show the loader while the network request is in flight and there's no error
   if (loading && !errorMessage) {
     return <LoadingContainer text="Joining room" styleSelected="bg-[#FACC15]" />;
   }
 
   return (
-    <div className="flex w-full flex-col items-center gap-4">
+    <div className="relative flex w-full flex-col items-center gap-4">
+      {/* Rematch Overlay Modal */}
+      {hasIncomingRematch && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs px-4">
+          <div className="flex w-full max-w-xs flex-col items-center gap-5 rounded-3xl border-[3.5px] border-[#1E293B] bg-white p-6 shadow-[8px_8px_0px_0px_#1E293B]">
+            <div className="flex flex-col items-center gap-1.5 text-center">
+              <span className="text-2xl">⚔️</span>
+              <h3 className="text-lg font-black text-[#1E293B]">Rematch Request</h3>
+              <p className="text-xs font-bold text-slate-500">
+                Opponent wants to play another round!
+              </p>
+            </div>
+
+            <div className="flex w-full flex-col gap-2.5">
+              <StylizedButton
+                isSelected={true}
+                text="Accept"
+                color="bg-[#10B981]"
+                borderSize="medium"
+                shadowSize="medium"
+                textSelectedColor="text-white"
+                textStyle="text-sm font-black tracking-wide"
+                functionCallback={handleAcceptRematch}
+              />
+              <StylizedButton
+                isSelected={true}
+                text="Decline"
+                color="bg-[#EF4444]"
+                borderSize="medium"
+                shadowSize="medium"
+                textSelectedColor="text-white"
+                textStyle="text-sm font-black tracking-wide"
+                functionCallback={handleDeclineRematch}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top-Right Leave Button */}
-      <div className="fixed top-6 right-6 z-50">
+      <div className="fixed top-6 right-6 z-40">
         <StylizedButton
           isSelected={true}
           text="Leave"
@@ -184,16 +350,55 @@ export default function GameBoard() {
           padding="px-4 py-2"
           borderSize="small"
           shadowSize="small"
-          customStyles="w-auto"
+          customStyles="w-auto text-white font-bold"
           functionCallback={handleLeave}
         />
       </div>
 
       {/* Centered Room Code Header */}
-      <div className="flex w-full items-center justify-center px-1">
-        <span className="text-md font-bold text-slate-500">
-          Room <span className="font-bold text-sm uppercase text-[#1E293B]">{roomCode}</span>
+      <div className="flex w-full flex-col items-center justify-center px-1">
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+          Room
         </span>
+
+        <div className="flex items-center gap-1.5">
+          <span className="text-xl font-bold uppercase tracking-wider text-[#1E293B]">
+            {roomCode}
+          </span>
+
+          <button
+            type="button"
+            onClick={handleCopyRoomCode}
+            aria-label="Copy Room Code"
+            title={copied ? "Copied!" : "Copy code"}
+            className="flex items-center justify-center p-1 text-slate-400 transition-colors hover:text-[#1E293B] active:scale-90"
+          >
+            {copied ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="h-4 w-4 text-emerald-600"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="h-4 w-4"
+              >
+                <path d="M7 3.5A1.5 1.5 0 0 1 8.5 2h3.879a1.5 1.5 0 0 1 1.06.44l3.122 3.12A1.5 1.5 0 0 1 17 6.622V12.5a1.5 1.5 0 0 1-1.5 1.5h-1v-3.379a3 3 0 0 0-.879-2.121L10.5 5.379A3 3 0 0 0 8.379 4.5H7v-1Z" />
+                <path d="M4.5 6A1.5 1.5 0 0 0 3 7.5v9A1.5 1.5 0 0 0 4.5 18h7a1.5 1.5 0 0 0 1.5-1.5v-5.879a1.5 1.5 0 0 0-.44-1.06L9.44 6.439A1.5 1.5 0 0 0 8.378 6H4.5Z" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Players Header */}
@@ -229,14 +434,22 @@ export default function GameBoard() {
         <div
           className={`rounded-2xl border-[2.5px] border-[#1E293B] px-6 py-2 text-sm font-black text-white shadow-[3px_3px_0px_0px_#1E293B] transition-all ${
             isGameOver
-              ? "bg-[#10B981]"
+              ? winner === playerMark
+                ? "bg-[#3B82F6]"
+                : winner === "Draw"
+                  ? "bg-slate-500"
+                  : "bg-[#EF4444]"
               : isMyTurn()
                 ? "bg-[#3B82F6]"
                 : "bg-slate-400"
           }`}
         >
           {isGameOver 
-            ? winner 
+            ? winner === playerMark 
+              ? "You won!" 
+              : winner === "Draw" 
+                ? "It's a draw!" 
+                : "You lost!"
             : isMyTurn()
               ? "Your turn" 
               : "Opponent's turn"}
@@ -254,7 +467,7 @@ export default function GameBoard() {
               <button
                 key={index}
                 type="button"
-                disabled={!isMyTurn || cellValue !== "" || isGameOver}
+                disabled={!isMyTurn() || cellValue !== "" || isGameOver}
                 onClick={() => handleCellClick(index)}
                 className={`flex items-center justify-center transition-colors ${
                   isRightBorder ? "border-r-[3.5px] border-[#1E293B]" : ""
@@ -278,20 +491,44 @@ export default function GameBoard() {
         </div>
       </div>
 
-      {/* Dynamic Subtext / Error Display */}
-      <p className="mt-1 text-xs font-semibold text-slate-400">
-        {errorMessage ? (
-          <span className="font-bold text-red-500">{errorMessage}</span>
-        ) : isGameOver ? (
-          "Game over"
-        ) : isWaitingForOpponent ? (
-          "Waiting for opponent to join..."
-        ) : isMyTurn() ? (
-          "Tap a square to play"
+      {/* Bottom Action Area */}
+      <div className="w-full max-w-95 mt-5 mb-10">
+        {isGameOver ? (
+          <StylizedButton
+            isSelected={true}
+            text={isRematchRequested ? "Waiting for Opponent..." : "Rematch"}
+            color="bg-[#FACC15]"
+            borderSize="large"
+            shadowSize="large"
+            padding="py-3.5 px-4"
+            textStyle="text-base font-black tracking-wide"
+            customStyles="rounded-2xl"
+            functionCallback={handleRematch}
+            hasHover={!isRematchRequested}
+          />
         ) : (
-          "Waiting for opponent move..."
+          <StylizedButton 
+            text={
+              errorMessage
+                ? errorMessage
+                : opponentLeft
+                  ? "Opponent has left the game"
+                  : isWaitingForOpponent
+                    ? "Waiting for opponent to join..."
+                    : isMyTurn()
+                      ? "Tap a square to play"
+                      : "Waiting for opponent move..."
+            }
+            color="bg-[#FACC15]"
+            hasHover={false}
+            isSelected={true}
+            borderSize="large"
+            shadowSize="large"
+            padding="py-3.5 px-4"
+            textStyle="text-base font-black tracking-wide"
+          />
         )}
-      </p>
+      </div>
     </div>
   );
 }

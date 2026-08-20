@@ -10,9 +10,11 @@ public class Board
     public char[] GetBoard() => (char[])_cells.Clone();
     public string Id { get; } = CodeGenerator.Generate();
     public char CurrentTurn { get; private set; } = 'X';
-    public HashSet<string> PlayerIds { get; } = [];
-    public bool XAssigned { get; private set; } = false;
-    public bool OAssigned { get; private set; } = false;
+
+    public Dictionary<string, char> PlayerMarks { get; } = [];
+    public int RematchAgreeCount = 0;
+    public int RematchDisagreeCount = 0;
+    public int PlayersPresent => PlayerMarks.Count;
 
     public (char, BoardOperationStatus) GetCell(int index)
     {
@@ -36,27 +38,43 @@ public class Board
         }
     }
 
-    public AssignMarkStatus Assignmark(char mark)
+    /// <summary>
+    /// Assigns an available mark or retrieves the mark already owned by this connection.
+    /// </summary>
+    public (char Mark, AssignMarkStatus Status) GetOrAssignMark(string connectionId)
     {
-        var upperMark = char.ToUpper(mark);
-
-        if (upperMark != 'X' && upperMark != 'O')
+        // If this player already has a mark, return it
+        if (PlayerMarks.TryGetValue(connectionId, out var existingMark))
         {
-            return AssignMarkStatus.InvalidMark;
+            return (existingMark, AssignMarkStatus.Success);
         }
 
-        if (upperMark == 'X' && !XAssigned)
+        if (PlayerMarks.Count >= 2)
         {
-            XAssigned = true;
-            return AssignMarkStatus.Success;
-        }
-        if (upperMark == 'O' && !OAssigned)
-        {
-            OAssigned = true;
-            return AssignMarkStatus.Success;
+            return ('\0', AssignMarkStatus.AlreadyAssigned);
         }
 
-        return AssignMarkStatus.AlreadyAssigned;
+        // Determine which mark is still free
+        bool hasX = PlayerMarks.ContainsValue('X');
+        bool hasO = PlayerMarks.ContainsValue('O');
+
+        char assignedMark;
+        if (!hasX && !hasO)
+        {
+            assignedMark = Random.Shared.Next(2) == 0 ? 'X' : 'O';
+        }
+        else
+        {
+            assignedMark = hasX ? 'O' : 'X';
+        }
+
+        PlayerMarks[connectionId] = assignedMark;
+        return (assignedMark, AssignMarkStatus.Success);
+    }
+
+    public void RemovePlayer(string connectionId)
+    {
+        PlayerMarks.Remove(connectionId);
     }
 
     /// <summary>
@@ -168,6 +186,56 @@ public class Board
             step = 2;
         }
 
+        // Check for draw (all cells filled, no winner)
+        bool isBoardFull = Array.TrueForAll(_cells, cell => cell != '\0' && cell != 0);
+        if (isBoardFull)
+        {
+            return (true, 'D'); // 'D' represents Draw
+        }
+
         return (false, '\0');
+    }
+
+    public void RestartBoard()
+    {
+        Array.Clear(_cells, 0, _cells.Length);
+        RematchAgreeCount = 0;
+        RematchDisagreeCount = 0;
+        CurrentTurn = 'X';
+
+        // Randomize marks between the 2 connected players
+        if (PlayerMarks.Count == 2)
+        {
+            var keys = PlayerMarks.Keys.ToList();
+            char firstMark = Random.Shared.Next(2) == 0 ? 'X' : 'O';
+            char secondMark = firstMark == 'X' ? 'O' : 'X';
+
+            PlayerMarks[keys[0]] = firstMark;
+            PlayerMarks[keys[1]] = secondMark;
+        }
+    }
+
+    /// <summary>
+    /// Restarts boards if both players agree
+    /// </summary>
+    /// <returns>
+    /// <para>0 if both players agree</para>
+    /// <para>1 if a player agrees and the other has not made a decision</para>
+    /// <para>2 if a player disagrees</para>
+    /// </returns>
+    public int Rematch(bool rematch)
+    {
+        if (rematch)
+        {
+            RematchAgreeCount++;
+
+            if (RematchAgreeCount >= 2) return 0;
+            return 1;
+        }
+        else
+        {
+            RematchDisagreeCount++;
+            return 2;
+        }
     }
 }

@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
-using TicTacToeOnline.GameEngine;
 using TicTacToeOnline.Enums;
+using TicTacToeOnline.GameEngine;
 
 namespace TicTacToeOnline.Data;
 
@@ -43,6 +43,30 @@ public class InMemoryGameStore : IGameStore
         else
         {
             return (false, GameStoreReturnStatus.ErrorRemovingBoard);
+        }
+    }
+
+    public async Task<GameStoreReturnStatus> Rematch(string boardId, bool rematch)
+    {
+        if (_games.TryGetValue(boardId, out Board? board))
+        {
+            var result = board.Rematch(rematch);
+
+            if (result == 2)
+            {
+                return GameStoreReturnStatus.RematchDenied;
+            }
+            if (result == 1)
+            {
+                return GameStoreReturnStatus.Waiting;
+            }
+
+            return GameStoreReturnStatus.RematchAccepted;
+
+        }
+        else
+        {
+            return GameStoreReturnStatus.BoardDoesNotExist;
         }
     }
 }
