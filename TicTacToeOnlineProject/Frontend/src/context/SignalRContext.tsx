@@ -46,7 +46,7 @@ export const SignalRProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     const newConnection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl)
-      .withAutomaticReconnect()
+      .withAutomaticReconnect([0, 2000, 5000, 10000, 30000]) // Retry immediately, then 2s, 5s, 10s, 30s max
       .build();
 
     connectionRef.current = newConnection;
