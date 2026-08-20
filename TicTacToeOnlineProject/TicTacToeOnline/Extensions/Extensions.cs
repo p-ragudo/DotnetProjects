@@ -15,32 +15,9 @@ public static class BoardMappingExtensions
             Grid = board.GetBoard()
                 .Select(c => c == '\0' ? string.Empty : c.ToString())
                 .ToArray(),
-            CurrentTurn = board.CurrentTurn
+            CurrentTurn = board.CurrentTurn,
+            PlayersPresent = board.PlayersPresent,
+            PlayerMarks = new Dictionary<string, char>(board.PlayerMarks)
         };
-    }
-
-    public static char GetMark(this Board board)
-    {
-        if (board.XAssigned)
-        {
-            board.Assignmark('O');
-            return 'O';
-        }
-        if (board.OAssigned)
-        {
-            board.Assignmark('X');
-            return 'X';
-        }
-
-        int randomNum = random.Next(0, 2);
-
-        if (randomNum == 0)
-        {
-            board.Assignmark('O');
-            return 'O';
-        }
-
-        board.Assignmark('X');
-        return 'X';
     }
 }

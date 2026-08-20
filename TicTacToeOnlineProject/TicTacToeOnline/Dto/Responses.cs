@@ -1,5 +1,4 @@
 using TicTacToeOnline.Enums;
-using TicTacToeOnline.GameEngine;
 
 namespace TicTacToeOnline.Dto;
 
@@ -8,6 +7,8 @@ public record BoardDto
     public string BoardId { get; init; } = string.Empty;
     public string[] Grid { get; init; } = new string[9];
     public char CurrentTurn { get; init; }
+    public int PlayersPresent { get; init; }
+    public Dictionary<string, char> PlayerMarks { get; init; } = [];
 }
 
 public record CreateGameResponse
@@ -83,6 +84,24 @@ public record MoveResponse
             UpdatedBoardDto = boardDto,
             IsGameOver = isGameOver,
             WinnerMark = winnerMark
+        };
+}
+
+public record RematchResponse
+{
+    public bool Success { get; init; }
+    public RematchReturnStatus Status { get; init; }
+    public BoardDto? BoardDto { get; init; }
+
+    public static RematchResponse Failed(RematchReturnStatus status)
+        => new() { Success = false, Status = status };
+
+    public static RematchResponse Ok(BoardDto? boardDto, RematchReturnStatus status)
+        => new()
+        {
+            Success = true,
+            Status = status,
+            BoardDto = boardDto,
         };
 }
 

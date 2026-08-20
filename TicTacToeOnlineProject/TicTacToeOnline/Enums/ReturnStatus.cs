@@ -26,7 +26,13 @@ public enum GameStoreReturnStatus
     BoardDoesNotExist,
     RemoveBoardSuccess,
     ErrorRemovingBoard,
-    BoardNullException
+    BoardNullException,
+    RestartBoardSuccess,
+    RematchRequestAccepted,
+    RematchAccepted,
+    RematchDenyAccepted,
+    Waiting,
+    RematchDenied,
 }
 
 public enum JoinGameReturnStatus
@@ -46,6 +52,15 @@ public enum MoveReturnStatus
     NotCurrentTurn,
     CellNotEmpty,
     GameFinished
+}
+
+public enum RematchReturnStatus
+{
+    BoardNotFound,
+    BoardNullException,
+    Waiting,
+    RematchAccepted,
+    RematchDenied
 }
 
 public enum BoardReturnStatus
