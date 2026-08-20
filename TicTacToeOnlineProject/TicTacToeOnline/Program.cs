@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using TicTacToeOnline.Data;
 using TicTacToeOnline.Hubs;
 using TicTacToeOnline.Services;
@@ -17,13 +18,45 @@ var allowedOrigins = !string.IsNullOrWhiteSpace(envOrigins)
 
 builder.Services.AddSingleton<IGameStore, InMemoryGameStore>();
 builder.Services.AddTransient<BoardService>();
-builder.Services.AddSignalR()
-    .AddJsonProtocol(options =>
-    {
-        options.PayloadSerializerOptions.Converters.Add(
-            new JsonStringEnumConverter()
-        );
-    });
+
+// 1. Cap SignalR buffers and connection lifetimes to avoid memory exhaustion
+builder.Services.AddSignalR(options =>
+{
+    options.MaximumReceiveMessageSize = 32 * 1024;
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+    options.KeepAliveInterval = TimeSpan.FromSeconds(10);
+    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+})
+.AddJsonProtocol(options =>
+{
+    options.PayloadSerializerOptions.Converters.Add(
+        new JsonStringEnumConverter()
+    );
+});
+
+// 2. HTTP Rate Limiting to prevent spam/abuse on endpoints
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 60,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            }));
+});
+
+// 3. Prevent slow-client header/body buffering attacks on Kestrel
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB limit
+    serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
+    serverOptions.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(30);
+});
 
 builder.Services.AddCors(options =>
 {
@@ -48,9 +81,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+app.UseRateLimiter();
+
 app.MapHub<GameHub>("/hubs/game");
-app.MapGet("/health", () => Results.Ok(
-    new { status = "healthy", timestamp = DateTime.UtcNow }
-));
+app.MapGet("/health", () =>
+    Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow })
+).DisableRateLimiting();
 
 app.Run();
